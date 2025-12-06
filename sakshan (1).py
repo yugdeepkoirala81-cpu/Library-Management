@@ -1,87 +1,88 @@
-'''
-Library Management System 
-#features
-register and login users 
-only valid users can view book,issue book, search book, add book, return book
-'''
+"""Library  management system
+(register, login --> user)
+(add book, issue book, return book, view book, search book)
+"""
 
-#Creating files user.txt and books.txt to store userdata and bookdata 
+
+''' creating two file named users.text and books.text, to store users info and books info permanently inside the file
+'''
 
 import os
 
 if not os.path.exists('users.txt'):
-    with open('users.txt',"w") as f:
+    with open('users.txt', 'w') as f:
         pass
 
 if not os.path.exists('books.txt'):
-    with open('books.txt',"w") as f:
+    with open('books.txt', 'w') as f:
         pass
 
-# for user data from users.txt into a dict
+# load data form the file
 
-def load_user():
-    user_dict = {}
+def load_users():
+    '''loads all the users data from users.txt into dic'''
+    users_dict = {}
 
     try:
-        with open("users.txt", "r") as x:
-            for line in x:
-                line = line.strip()  # Strip newline and extra spaces
+        with open('users.txt','r') as f:
+            for line in f:
+                line = line.strip()
                 if line:
                     username, password = line.split(',')
-                    user_dict[username] = password
-    except FileNotFoundError:  # Correct exception type
-        print("File not found!")
-    return user_dict
-# book_id, title, author, quantity
+                    users_dict[username] = password
+    except FileNotFoundError:
+        print('File not found! ')
 
-def load_book():
-    book_list = []
-
+    return users_dict
+# book id, author, quantity
+    
+def load_books():
+    books_list = []
     try:
-        with open("books.txt", "r") as x:
-            for line in x:
-                line = line.strip()  # Strip newline and extra spaces
+        with open('books.txt','r') as f:
+            for line in f:
+                line = line.strip()
                 if line:
-                    book_id, title, author, quantity = line.split(',')
+                    book_id,title,author,quantity = line.split(',')
+
                     book = {
-                        'id': book_id,
+                        'id' : book_id,
                         'title': title,
                         'author': author,
                         'quantity': int(quantity)
                     }
-                    book_list.append(book)
-    except FileNotFoundError:  # Correct exception type
-        print("File not found!")
-    return book_list
+                    books_list.append(book)
+    except FileNotFoundError:
+        print('File not found')
+    return books_list
 
-def get_ids(book_list):
-    book_ids = set()  # Use a set for unique IDs
-    for book in book_list:
+def get_existing_books_id(books_list):
+    '''Create a set to store all the ids of the books'''
+    book_ids = set()
+    for book in books_list:
+        # dic
         book_ids.add(book['id'])
     return book_ids
 
-## user registration
-
-def registration(user_dict):
-    '''Register new user'''
-    print('''\n 
-          ---Registration''')
-    username=input("Enter username").strip()
-    password= input("Enter password").strip()
-    if username in user_dict:
-        print("User already exists")
+# user registration
+def register_user(users_dict):
+    '''register a new user'''
+    print("\n --- Register a New USer ----")
+    username = input("Enter the username: ").strip()
+    password = input("Enter the password: ").strip()
+    if username in users_dict:
+        print('username already exists')
         return False
     if not username or not password:
-        print("Fields cannot be empty")
+        print('Username and password cannot empty')
         return False
-    user_dict[username]=password
+    users_dict[username]=password
 
-    # saving the registered user in users.txt
-    with open("users.txt","a") as f:
-        f.write(f"{username},{password}\n")
-
-user_dict=load_user()
-print(user_dict)
+    # save the registered user to the file 'users.txt
+    with open('users.txt','a') as f:
+        f.write(f'{username},{password}\n')
+    print('Registration successful!')
+    return True
 
 # users_dict = load_users()
 # print(users_dict)
@@ -280,6 +281,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 
