@@ -55,9 +55,7 @@ def load_book():
     return book_list
 
 def get_ids(book_list):
-    book_ids = set()  # Use a set for unique IDs
-    for book in book_list:
-        book_ids.add(book['id'])
+    book_ids = {book['id'] for book in book_list}  # Use set comprehension
     return book_ids
 
 ## user registration
@@ -66,19 +64,20 @@ def registration(user_dict):
     '''Register new user'''
     print('''\n 
           ---Registration''')
-    username=input("Enter username").strip()
-    password= input("Enter password").strip()
+    username = input("Enter username: ").strip()
+    password = input("Enter password: ").strip()
     if username in user_dict:
         print("User already exists")
         return False
     if not username or not password:
         print("Fields cannot be empty")
         return False
-    user_dict[username]=password
+    user_dict[username] = password
 
     # saving the registered user in users.txt
-    with open("users.txt","a") as f:
+    with open("users.txt", "a") as f:
         f.write(f"{username},{password}\n")
+    print("User registered successfully!")
 
 user_dict=load_user()
 print(user_dict)
@@ -87,12 +86,12 @@ print(user_dict)
 # print(users_dict)
 # register_user(users_dict)
 
-def login_user(users_dict):
+def login_user(user_dict):
     print("\n ----Login User-----")
     username= input('Enter user name: ').strip()
     password = input('Enter your password ').strip()
 
-    if username in users_dict and users_dict[username] == password:
+    if username in user_dict and user_dict[username] == password:
         print(f"Welcome {username.capitalize()}")
         return username
     else:
@@ -121,31 +120,37 @@ def main_menu():
 
 
 # add books
-def add_book(books_list, books_ids):
+def add_book(book_list, book_ids):
     """adding a new book to the library"""
     print("\n ----- Add New Book-----")
     book_id = input('Enter the Book Id: ').strip()
 
-    if book_id in books_ids:
-        print("book id already exists!")
+    if book_id in book_ids:
+        print("Book id already exists!")
         return
     title = input("Enter the name of a book: ").strip()
-    author = input('ENter the author: ').strip()
-    quantity = int(input("Enter the quantity of books: ").strip())
+    author = input('Enter the author: ').strip()
+
+    while True:
+        try:
+            quantity = int(input("Enter the quantity of books: ").strip())
+            break
+        except ValueError:
+            print("Invalid input! Quantity must be an integer.")
 
     new_book = {
         'id': book_id,
         'title': title,
-        'author':author,
+        'author': author,
         'quantity': quantity
     }
 
-    books_list.append(new_book)
-    books_ids.add(book_id)
+    book_list.append(new_book)
+    book_ids.add(book_id)
 
-    with open('books.txt','a') as f:
-      f.write(f'{book_id},{title},{author},{quantity}\n')
-      print("book added successfully")
+    with open('books.txt', 'a') as f:
+        f.write(f"{book_id},{title},{author},{quantity}\n")
+        print("Book added successfully")
 
 # books_list = load_books()
 # book_ids = get_existing_books_id(books_list)
@@ -168,45 +173,45 @@ def view_books(books_list):
 
 # searching for book using title or author
 def search_book(books_list):
- ''' Search book by books title or author name'''
- found_items = []
- search_item = input('Search here: ').strip().lower()
+    ''' Search book by book title or author name'''
+    found_items = []
+    search_item = input('Search here: ').strip().lower()
 
- for book in books_list:
-     if search_item in book['title'].lower() or search_item in book['author'].lower():
-         found_items.append(book)
- if found_items:
-     print(f'Found {len(found_items)} books')
-     view_books(found_items)
- else:
-     print("no books available")
-     
+    for book in books_list:
+        if search_item in book['title'].lower() or search_item in book['author'].lower():
+            found_items.append(book)
+    if found_items:
+        print(f'Found {len(found_items)} books')
+        view_books(found_items)
+    else:
+        print("No books available")
+
 # search_book(books_list)
 # saving books to the file
 
 def save_books(books_list):
- '''write all books back to books.txt'''
- with open('books.txt','w') as f:
-     for book in books_list:
-         f.write(f'{book['id']},{book['title']},{book['author']},{book['quantity']}\n')
+    '''write all books back to books.txt'''
+    with open('books.txt', 'w') as f:
+        for book in books_list:
+            f.write(f"{book['id']},{book['title']},{book['author']},{book['quantity']}\n")
 
 
 # issue book --> user le library bata book lanu
 def issue_book(books_list):
     book_id = input('Enter book id to issue: ').strip()
-    
+
     for book in books_list:
         if book['id'] == book_id:
-            if book['quantity']>0:
-                book['quantity']-=1
+            if book['quantity'] > 0:
+                book['quantity'] -= 1
 
                 save_books(books_list)
-                print(f'Book {book['title']} issued successfully!')
+                print(f"Book {book['title']} issued successfully!")
                 print(f"Remaining quantity: {book['quantity']}")
-                return 
+                return
             else:
-                print("Books is out of stocks!")
-                return 
+                print("Books are out of stock!")
+                return
     print("Book id not found")
 
 def return_book(books_list):
@@ -218,7 +223,7 @@ def return_book(books_list):
 
             save_books(books_list)
 
-            print(f'Book{book['title']} returned successfully!')
+            print(f"Book {book['title']} returned successfully!")
             print(f"Current quantity: {book['quantity']}")
             return
     print('Book id not found')
@@ -232,35 +237,35 @@ def return_book(books_list):
 
 def main():
     ''' Main program loop'''
-    users_dict = load_users()
+    users_dict = load_user()
 
-    print('='*50)
-    print('---- Welcome to library Management System')
-    print('='*50)
+    print('=' * 50)
+    print('---- Welcome to Library Management System ----')
+    print('=' * 50)
 
     while True:
         print("\n 1. Register")
         print('\n 2. Login')
         print('\n 3. Exit')
 
-        choice= input('\n Enter choice(1,2,3): ').strip()
+        choice = input('\n Enter choice (1, 2, 3): ').strip()
         if choice == '1':
-            register_user(users_dict)
+            registration(users_dict)
         elif choice == '2':
             username = login_user(users_dict)
-            
+
             if username:
-                books_list = load_books()
-                book_ids = get_existing_books_id(books_list)
+                books_list = load_book()
+                book_ids = get_ids(books_list)
 
                 while True:
                     main_menu()
-                    menu_choice = input("\n Enter choice(1-6): ")
+                    menu_choice = input("\n Enter choice (1-6): ").strip()
                     if menu_choice == '1':
                         add_book(books_list, book_ids)
                     elif menu_choice == '2':
                         view_books(books_list)
-                    elif menu_choice =='3':
+                    elif menu_choice == '3':
                         search_book(books_list)
                     elif menu_choice == '4':
                         issue_book(books_list)
@@ -270,13 +275,13 @@ def main():
                         print(f'Bye {username.capitalize()}')
                         break
                     else:
-                        print('Invalid choice')
+                        print('Invalid choice! Please enter a number between 1 and 6.')
 
         elif choice == '3':
-            print('Thankyou for using my library management system')
+            print('Thank you for using the Library Management System!')
             break
         else:
-            print('Invalid choice')
+            print('Invalid choice! Please enter 1, 2, or 3.')
 
 if __name__ == "__main__":
     main()
